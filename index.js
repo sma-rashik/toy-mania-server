@@ -27,12 +27,19 @@ async function run() {
 
         const toyCollection = client.db('kidsToy').collection("toys")
 
-        app.get('/toys', async (req, res) => {
-            const cursor = toyCollection.find();
-            const result = await cursor.toArray()
-            console.log(result);
-            res.send(result)
-        })
+        app.get("/toys", async (req, res) => {
+            const sort = req.query.sort; // Get the sorting order from query parameter
+
+            try {
+                const cursor = toyCollection.find().sort({ price: sort === "asc" ? 1 : -1 }); // Sort toys based on price in ascending or descending order
+                const result = await cursor.toArray();
+                res.send(result);
+            } catch (error) {
+                console.error("Error fetching toys:", error);
+                res.status(500).json({ error: "Failed to fetch toys" });
+            }
+        });
+
         // Create   
         app.post('/addToys', async (req, res) => {
             const newToy = req.body;
